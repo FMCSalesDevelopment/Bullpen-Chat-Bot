@@ -147,34 +147,44 @@
   <script>
     // ===== 1) STARTER QUESTIONS (chips) =====
     const starterQuestions = [
-      "What’s new this week?",
-      "Recent updates",
-      "What are you working on?",
-      "What changed?",
-      "Upcoming plans",
-      "How can I contact you?"
+      // ===== 1) STARTER QUESTIONS (chips) =====
+const starterQuestions = [
+  "Hi",
+  "Who can help me with licensing issues in Xstream?",
+  "Where can I find the Loan Advisors schedules?",
+  "Where can I find good call examples for Streamline?"
+];
+
+// ===== 2) SCRIPTED RESPONSES (exact match or keyword-driven) =====
+const scriptedResponses = {
+  "hi": "Hello, How can I help you today?",
+  "who can help me a licensing issues in xstream?": "The Loan Advisor licensing rep & SFCampmngt.",
+  "where can i find the loan advisors schedules?": "Nice-WFM.",
+  "where can i find good call examples for stremaline?": "In the call library on the Sales Dev SharePoint site."
+};
+
     ];
 
     // ===== 2) PERSONAL UPDATES (edit these) =====
     // Keep items concise. Newest first.
     const updates = [
       {
-        title: "Launching the scripted chatbot demo",
+        title: "Sales Development NEW ChatBot",
         date: "2025-11-20",
-        tags: ["project", "web"],
-        summary: "Initial version published. Static HTML, JS-only, easy GitHub Pages deployment."
+        tags: ["ongoing project", "web"],
+        summary: "Initial version published."
       },
       {
-        title: "Writing weekly update notes",
+        title: "Writing monthly update notes",
         date: "2025-11-18",
         tags: ["process"],
-        summary: "Started a habit of summarizing progress every Friday."
+        summary: "updates will be published at the beginning of each month."
       },
       {
-        title: "Planning Q4 goals",
-        date: "2025-11-15",
+        title: "This is a TEST Bot",
+        date: "2025-11-20",
         tags: ["planning"],
-        summary: "Drafted goals focused on shipping and outreach."
+        summary: "Initial Draft to see layout & functionality."
       }
     ];
 
@@ -304,3 +314,4 @@
   </script>
 </body>
 </html>
+
