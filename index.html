@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scripted Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #3b82f6;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --user: #22c55e;
+      --bot: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #0b1220, var(--bg));
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .chat {
+      width: 100%;
+      max-width: 780px;
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    .chat header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #06b6d4);
+      display: grid; place-items: center; color: white; font-weight: 700;
+      box-shadow: 0 6px 20px rgba(59,130,246,.35);
+    }
+    .title { font-weight: 600; }
+    .subtitle { color: var(--muted); font-size: 14px; }
+
+    .messages {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: start;
+      animation: fadeIn .2s ease-in;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--bot);
+      display: grid; place-items: center;
+      color: #cbd5e1; font-weight: 700;
+    }
+    .user .avatar { background: var(--user); color: #052e14; }
+    .bubble {
+      background: #0b1220;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      border-radius: 12px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .user .bubble {
+      background: #052e14;
+      border-color: #0a3b1f;
+    }
+
+    .suggestions {
+      padding: 12px 16px;
+      border-top: 1px solid #1f2937;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      background: rgba(17, 24, 39, 0.45);
+    }
+    .suggestions button {
+      border: 1px solid #1f2937;
+      background: #0b1220;
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .suggestions button:hover { border-color: var(--accent); color: #bfdbfe; }
+
+    .input {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid #1f2937;
+      background: rgba(17, 24, 39, 0.6);
+    }
+    .input input {
+      width: 100%;
+      background: #0b1220;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+    }
+    .input input::placeholder { color: #6b7280; }
+    .input button {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .input button:disabled { opacity: .6; cursor: not-allowed; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main class="chat" role="application" aria-label="Scripted chatbot">
+    <header>
+      <div class="logo" aria-hidden="true">CB</div>
+      <div>
+        <div class="title">Scripted Chatbot</div>
+        <div class="subtitle">Predefined answers for common questions</div>
+      </div>
+    </header>
+
+    <section id="messages" class="messages" aria-live="polite" aria-relevant="additions">
+      <!-- Initial bot message -->
+      <div class="msg bot">
+        <div class="avatar" aria-hidden="true">AI</div>
+        <div class="bubble">Hello, How can I help you today?</div>
+      </div>
+    </section>
+
+    <div class="suggestions" aria-label="Suggested questions">
+      <button data-q="Hi">Hi</button>
+      <button data-q="Who can help me a licensing issues in Xstream?">Who can help me a licensing issues in Xstream?</button>
+      <button data-q="where can i find the Loan Advisors schedules?">where can i find the Loan Advisors schedules?</button>
+      <button data-q="where can i find good call examples for streamline?">where can i find good call examples for streamline?</button>
+      <button data-q="Can I write a 15 year streamline irrrl?">Can I write a 15 year streamline irrrl?</button>
+      <button data-q="Phone widget not clocking a LA out?">Phone widget not clocking a LA out?</button>
+    </div>
+
+    <form class="input" id="chatForm" autocomplete="off">
+      <input id="chatInput" type="text" placeholder="Type a question and press Enter…" aria-label="Chat input" />
+      <button id="sendBtn" type="submit">Send</button>
+    </form>
+  </main>
+
+  <script>
+    // Predefined Q&A, normalized to lowercase keys for matching
+    const QA = [
+      {
+        triggers: ["hi", "hello", "hey"],
+        answer: "Hello, How can I help you today?"
+      },
+      {
+        triggers: [
+          "who can help me a licensing issues in xstream?",
+          "licensing xstream",
+          "xstream licensing help"
+        ],
+        answer: "the Loan Advisor licensing rep & SFCampmngt."
+      },
+      {
+        triggers: [
+          "where can i find the loan advisors schedules?",
+          "loan advisor schedules",
+          "la schedules",
+          "schedule nice wfm"
+        ],
+        answer: "Nice-WFM."
+      },
+      {
+        triggers: [
+          "where can i find good call examples for streamline?",
+          "streamline call examples",
+          "good call examples"
+        ],
+        answer: "in the call library on the Sales Dev Sharepoint site"
+      },
+      {
+        triggers: [
+          "can i write a 15 year streamline irrrl?",
+          "15 year streamline irrrl",
+          "irrrl streamline"
+        ],
+        answer: "navigate to either resource 1) sales org Tool or All Regs to fins this answer"
+      },
+      {
+        triggers: [
+          "phone widget not clocking a la out?",
+          "phone widget not clocking",
+          "cxone phone widget"
+        ],
+        answer: "Put in a Lucy ticket for CXone support"
+      }
+    ];
+
+    const messagesEl = document.getElementById("messages");
+    const formEl = document.getElementById("chatForm");
+    const inputEl = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Utilities
+    function normalize(text) {
+      return text.trim().toLowerCase();
+    }
+
+    function addMessage(text, role = "user") {
+      const msg = document.createElement("div");
+      msg.className = `msg ${role}`;
+      msg.innerHTML = `
+        <div class="avatar" aria-hidden="true">${role === "user" ? "You" : "AI"}</div>
+        <div class="bubble">${escapeHtml(text)}</div>
+      `;
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, s => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[s]));
+    }
+
+    function findAnswer(query) {
+      const q = normalize(query);
+
+      // Exact trigger match
+      for (const item of QA) {
+        if (item.triggers.includes(q)) return item.answer;
+      }
+      // Keyword fuzzy match
+      for (const item of QA) {
+        for (const trig of item.triggers) {
+          const t = normalize(trig);
+          // Simple inclusion heuristic
+          if (q.includes(t) || t.includes(q)) return item.answer;
+        }
+      }
+      // Targeted keywords
+      if (q.includes("licens") && q.includes("xstream")) {
+        return "the Loan Advisor licensing rep & SFCampmngt.";
+      }
+      if ((q.includes("schedule") || q.includes("wfm")) && (q.includes("loan advisor") || q.includes("la"))) {
+        return "Nice-WFM.";
+      }
+      if (q.includes("streamline") && q.includes("call")) {
+        return "in the call library on the Sales Dev Sharepoint site";
+      }
+      if (q.includes("irrrl") || (q.includes("15") && q.includes("streamline"))) {
+        return "navigate to either resource 1) sales org Tool or All Regs to fins this answer";
+      }
+      if (q.includes("phone widget") && q.includes("clock")) {
+        return "Put in a Lucy ticket for CXone support";
+      }
+
+      return "I don’t have that answer scripted yet. Try one of the suggested questions below or rephrase.";
+    }
+
+    // Form submit
+    formEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = inputEl.value;
+      if (!text.trim()) return;
+
+      addMessage(text, "user");
+      inputEl.value = "";
+      sendBtn.disabled = true;
+
+      // Simulate thinking delay
+      setTimeout(() => {
+        const reply = findAnswer(text);
+        addMessage(reply, "bot");
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }, 250);
+    });
+
+    // Suggestions click
+    document.querySelectorAll(".suggestions button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const q = btn.getAttribute("data-q");
+        inputEl.value = q;
+        formEl.dispatchEvent(new Event("submit"));
+      });
+    });
+
+    // Accessibility: submit on Enter
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        formEl.dispatchEvent(new Event("submit"));
+      }
+    });
+  </script>
+</body>
+</html>
